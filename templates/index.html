@@ -4,6 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
+    <style>
+      .hidden {
+        display: none;
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+    </style>
   </head>
   <body>
     <form id="form">
@@ -12,10 +24,30 @@
     </form>
     <ul id="todos">
       {% for d in data %}
-      <li>{{d.description}}</li>
+      <li><input type="checkbox" class="check-completed" data-id="{{ d.id }}" {% if d.completed %} checked {% endif %}/>{{d.description}}</li>
       {% endfor %}
     </ul>
     <script>
+
+      const checkboxes = document.querySelectorAll('.check-completed');
+      for (let i=0; i < checkboxes.length; i++){
+        const checkbox = checkboxes[i];
+        checkbox.onchange = function(e) {
+          console.log('event', e);
+          const newCompleted = e.target.checked;
+          const todoID = e.target.dataset['id'];
+          fetch('/todos/' + todoID + '/set-completed', {
+            method: 'POST',
+            body: JSON.stringify({
+              'completed': newCompleted
+            }),
+            headers: {
+              'Content-Type' : 'application/json'
+            }
+          })
+        }
+      }
+
       document.getElementById("form").onsubmit = function(e) {
         e.preventDefault();
         fetch("/todos/create", {
